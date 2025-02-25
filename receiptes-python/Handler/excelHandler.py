@@ -4,7 +4,7 @@ from web3Handler import we3Handler
 from openpyxl import Workbook
 
 
-class excelOps:
+class ExcelOps:
     def __init__(self):
         self.wb = Workbook()
         self.ws = self.wb.active
@@ -34,13 +34,10 @@ class excelOps:
             self.ws["H" + str(i + 2)] = invoiceList[i].typeID
             self.ws["I" + str(i + 2)] = invoiceList[i].sumPrice
             self.ws["J" + str(i + 2)] = invoiceList[i].invoiceDate
-
-            # info = SQLops().find_by_id(invoiceList[i])
             info = we3Handler().invoiceExisted(invoiceList[i].id)
             if not info[11]:
                 try:
                     we3Handler().addInvoice(invoiceList[i])
-                    # SQLops().add(invoiceList[i])
                 except Exception as e:
                     print(e)
                 invoiceList[i].repeat = "否"
@@ -51,8 +48,3 @@ class excelOps:
             self.ws["L" + str(i + 2)] = invoiceList[i].repeat
 
         self.wb.save(self.filename)
-
-
-if __name__ == '__main__':
-    date1 = str(date.today())
-    print(date1)

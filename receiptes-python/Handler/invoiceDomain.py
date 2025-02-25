@@ -1,4 +1,4 @@
-class invoiceDomain:
+class InvoiceDomain:
     def __init__(self):
         self.id = ""
         self.fileName = ""

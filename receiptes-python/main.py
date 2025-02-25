@@ -1,4 +1,4 @@
-from Handler.excelHandler import excelOps
+from Handler.excelHandler import ExcelOps
 from Handler.ocrHandler import OCR
 from Handler.pdfHandler import PDFInvoice
 
@@ -13,7 +13,7 @@ class invoiceRecord:
         allInvoiceList = list()
         allInvoiceList.extend(pdf.invoiceList)
         allInvoiceList.extend(ocr.invoiceList)
-        excelOps().add(allInvoiceList)
+        ExcelOps().add(allInvoiceList)
 
 
 if __name__ == '__main__':

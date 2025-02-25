@@ -1,66 +1,62 @@
 import os
 from web3Handler import we3Handler
-
 import fitz
 from pyzbar.pyzbar import decode
 from PIL import Image
-
-from confDomain import confDomain
-from invoiceDomain import invoiceDomain
-
+from confDomain import ConfDomain
+from invoiceDomain import InvoiceDomain
 
 
 class PDFInvoice:
 
     def __init__(self):
-        self.base_path = "./input"
-        self.file_paths = ""
+        self.basePath = "./input"
+        self.filePaths = ""
         self.invoiceList = list()
 
-    def get_filepath(self):
+    def getFilepath(self):
         '''获取当前路径下所有的电子发票pdf文件路径'''
-        file_paths = []
-        file_names = os.listdir(self.base_path)
-        for file_name in file_names:
-            if file_name.endswith('.pdf'):
-                file_paths.append(os.path.join(self.base_path, file_name))
-        self.file_paths = file_paths
+        filePaths = []
+        fileNames = os.listdir(self.basePath)
+        for fileName in fileNames:
+            if fileName.endswith('.pdf'):
+                filePaths.append(os.path.join(self.basePath, fileName))
+        self.filePaths = filePaths
 
-    def get_invoiceList(self):
+    def getInvoiceList(self):
 
         '''逐一对所有电子发票文件左上角的二维码识别并重命名文件'''
-        for file_path in self.file_paths:
-            invoice = self.get_qrcode(file_path)
+        for filePath in self.filePaths:
+            invoice = self.getQrcode(filePath)
             self.invoiceList.append(invoice)
 
-
-    def get_qrcode(self, file_path):
-        invoice = invoiceDomain()
+    def getQrcode(self, filePath):
+        invoice = InvoiceDomain()
         '''提取pdf文件中左上角的二维码并识别'''
-        pdfDoc = fitz.open(file_path)
-        invoice.fileName = file_path.replace("./input\\", "")
+        pdfDoc = fitz.open(filePath)
+        invoice.fileName = filePath.replace("./input\\", "")
         # 初始化一个空字符串来收集文本
-        full_text = ""
+        fullText = ""
 
         # 遍历每一页
         for page in pdfDoc:
-            # 提取当前页面的文本并追加到full_text字符串
-            full_text += page.get_text()
+            # 提取当前页面的文本并追加到fullText字符串
+            fullText += page.get_text()
 
-        full_text_list = full_text.split("\n")
-        invoice.typeName = full_text_list[0]
-        conf = confDomain()
-        ini_index = 0
-        for item in full_text_list:
+        fullTextList = fullText.split("\n")
+        invoice.typeName = fullTextList[0]
+        conf = ConfDomain()
+        iniIndex = 0
+        for item in fullTextList:
             if item.find(conf.active) >= 0:
-                ini_index = full_text_list.index(item)
+                iniIndex = fullTextList.index(item)
 
-        invoice.id = full_text_list[ini_index - 2]
-        invoice.invoiceDate = full_text_list[ini_index - 1]
-        invoice.toName = full_text_list[ini_index]
-        invoice.toID = full_text_list[ini_index + 1]
-        invoice.formName = full_text_list[ini_index + 2]
-        invoice.formID = full_text_list[ini_index + 3]
+        invoice.id = fullTextList[iniIndex - 2]
+        invoice.invoiceDate = fullTextList[iniIndex - 1]
+        invoice.toName = fullTextList[iniIndex]
+        invoice.toID = fullTextList[iniIndex + 1]
+        invoice.formName = fullTextList[iniIndex + 2]
+        invoice.formID = fullTextList[iniIndex + 3]
         info = we3Handler().invoiceExisted(invoice.id)
 
         if not info[11]:
@@ -69,11 +65,10 @@ class PDFInvoice:
             invoice.createDate = info[10]
             invoice.repeat = "是"
 
-
         rotate = int(0)
-        zoom_x = 3.0
-        zoom_y = 3.0
-        mat = fitz.Matrix(zoom_x, zoom_y).prerotate(rotate)
+        zoomX = 3.0
+        zoomY = 3.0
+        mat = fitz.Matrix(zoomX, zoomY).prerotate(rotate)
         rect = page.rect
         mp = rect.tl + (rect.br - rect.tl) * 1 / 5
         clip = fitz.Rect(rect.tl, mp)
@@ -91,9 +86,8 @@ class PDFInvoice:
         return invoice
 
     def main(self):
-        self.get_filepath()
-        self.get_invoiceList()
-        # self.record_invoice()
+        self.getFilepath()
+        self.getInvoiceList()
 
 
 if __name__ == '__main__':
